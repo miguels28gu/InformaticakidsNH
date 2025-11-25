@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Ciberciudadano: Nivel Legendario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, h4, .fun-font { font-family: 'Fredoka', sans-serif; }
+        
+        /* --- ANIMACIONES GLOBALES --- */
+        [data-content] { display: none; }
+        .active[data-content] { display: block; animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake-anim { animation: shake 0.3s ease-in-out; }
+
+        /* --- UI ELEMENTS --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-btn {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 0%; height: 4px;
+            background: white;
+            transition: width 0.3s;
+        }
+        .nav-btn.active::after { width: 100%; }
+        .nav-btn:hover { transform: translateY(-3px); }
+        .nav-btn.active { 
+            background: rgba(255,255,255,0.2); 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Theory Card Style */
+        .theory-card {
+            background-color: #f8fafc;
+            border-left: 4px solid #6366f1;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+        }
+        .theory-title {
+            color: #1e293b;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Day/Night Cycle Classes */
+        .bg-day { background: linear-gradient(135deg, #bae6fd 0%, #e0f2fe 100%); }
+        .bg-sunset { background: linear-gradient(135deg, #fdba74 0%, #fcd34d 100%); }
+        .bg-night { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; }
+
+        /* Animation for Breathing Exercise */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.5); opacity: 1; }
+        }
+        .breathing-circle {
+            animation: breathe 8s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-indigo-50 text-slate-800 min-h-screen flex flex-col transition-colors duration-1000" id="mainBody">
+
+    <!-- BARRA DE PROGRESO SUPERIOR -->
+    <div class="fixed top-0 left-0 w-full h-2 bg-slate-200 z-[60]">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-yellow-400 to-orange-500 w-[10%] transition-all duration-500 rounded-r-full"></div>
+    </div>
+
+    <!-- HEADER GAMIFICADO -->
+    <header class="bg-indigo-600 text-white p-3 md:p-4 shadow-xl z-50 mt-2">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-xl float-anim">
+                    <span class="text-3xl md:text-4xl">🚀</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Academia Ciberciudadano</h1>
+                    <p class="text-indigo-200 text-xs md:text-sm font-bold uppercase tracking-widest">Plan de Clase Unificado</p>
+                </div>
+            </div>
+            
+            <!-- Panel de Logros -->
+            <div class="flex gap-2 bg-indigo-800/50 p-2 rounded-xl border border-indigo-400/30">
+                <div class="medal opacity-30 grayscale transition-all duration-500" id="medal-seguridad" title="Escudo de Seguridad">🛡️</div>
+                <div class="medal opacity-30 grayscale transition-all duration-500" id="medal-alertas" title="Detector de Trampas">🚨</div>
+                <div class="medal opacity-30 grayscale transition-all duration-500" id="medal-balance" title="Maestro Zen">🧘</div>
+                <div class="medal opacity-30 grayscale transition-all duration-500" id="medal-busqueda" title="Investigador Pro">🔎</div>
+                <div class="w-px bg-indigo-400/50 mx-1"></div>
+                <span class="text-yellow-400 font-bold" id="xpPoints">0 XP</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN ESTILO APP -->
+    <nav class="bg-indigo-500 sticky top-0 z-40 shadow-lg">
+        <div class="max-w-6xl mx-auto flex overflow-x-auto p-1 gap-1 md:justify-center no-scrollbar">
+            <button class="nav-btn px-4 py-3 rounded-lg font-bold text-white whitespace-nowrap active" onclick="switchTab('intro')">1. Inicio 🌍</button>
+            <button class="nav-btn px-4 py-3 rounded-lg font-bold text-white whitespace-nowrap" onclick="switchTab('seguridad')">2. Escudos 🛡️</button>
+            <button class="nav-btn px-4 py-3 rounded-lg font-bold text-white whitespace-nowrap" onclick="switchTab('alertas')">3. Trampas 🚨</button>
+            <button class="nav-btn px-4 py-3 rounded-lg font-bold text-white whitespace-nowrap" onclick="switchTab('balance')">4. Energía 🧘</button>
+            <button class="nav-btn px-4 py-3 rounded-lg font-bold text-white whitespace-nowrap" onclick="switchTab('busqueda')">5. Detectives 🔎</button>
+            <button class="nav-btn px-4 py-3 rounded-lg font-bold text-yellow-300 whitespace-nowrap" onclick="switchTab('quiz')">6. Graduación 🎓</button>
+        </div>
+    </nav>
+
+    <main class="flex-grow p-4 md:p-8 max-w-5xl mx-auto w-full relative">
+
+        <!-- 1. INTRODUCCIÓN: LA RED VIVIENTE -->
+        <section id="intro" class="active" data-content>
+            <div class="glass-panel p-6 md:p-8 rounded-3xl shadow-2xl border-b-8 border-indigo-300 relative overflow-hidden">
+                <!-- Decorative BG Elements -->
+                <div class="absolute top-0 left-0 w-32 h-32 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+
+                <div class="text-center relative z-10">
+                    <h2 class="text-4xl md:text-5xl font-bold text-indigo-900 mb-4 float-anim">Internet: La Autopista Digital</h2>
+                    
+                    <!-- BLOQUE DE TEORÍA -->
+                    <div class="theory-card text-left max-w-3xl mx-auto bg-indigo-50/80 border-indigo-500">
+                        <h4 class="theory-title text-indigo-700">📂 Archivo de Misión: Definición</h4>
+                        <p class="text-slate-700 mb-4 leading-relaxed">
+                            <strong>Internet</strong> es una red de comunicación global descentralizada que conecta computadoras, tabletas y celulares en todo el mundo. Es la infraestructura que permite acceder a servicios como la World Wide Web. Permite buscar información, ver videos, jugar, estudiar y comunicarse, y es la herramienta más rápida para acceder al conocimiento si se utiliza con responsabilidad.
+                        </p>
+                        
+                        <div class="overflow-x-auto rounded-lg border border-indigo-200 bg-white">
+                            <table class="w-full text-sm">
+                                <thead class="bg-indigo-100 text-indigo-900">
+                                    <tr>
+                                        <th class="p-3 text-left">Analogía Principal</th>
+                                        <th class="p-3 text-left">Ejemplo Práctico</th>
+                                        <th class="p-3 text-left">Implicación</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-slate-600">
+                                    <tr>
+                                        <td class="p-3 font-bold">La Autopista más Grande del Mundo</td>
+                                        <td class="p-3">Conectar tu consola para jugar con un amigo en otro país.</td>
+                                        <td class="p-3">Te permite acceder a información y amigos al instante, pero también tiene riesgos y reglas de tráfico.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- NUEVA ACTIVIDAD: SEMÁFORO DIGITAL -->
+                    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border-4 border-gray-600 my-8 max-w-md mx-auto relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500"></div>
+                        <h3 class="text-white font-bold text-xl mb-4">🚦 Mini-Juego: El Semáforo de Internet</h3>
+                        
+                        <div id="trafficLightCard" class="bg-gray-100 p-4 rounded-lg mb-4 text-slate-800 font-bold min-h-[4rem] flex items-center justify-center text-center">
+                            Presiona Iniciar para jugar...
+                        </div>
+                        
+                        <div class="flex justify-center gap-4" id="trafficButtons">
+                            <button onclick="playTraffic('red')" class="w-16 h-16 rounded-full bg-red-500 hover:bg-red-400 border-4 border-red-700 shadow-lg transform active:scale-90 transition-all focus:outline-none ring-4 ring-transparent focus:ring-red-300" title="¡ALTO! Peligro"></button>
+                            <button onclick="playTraffic('yellow')" class="w-16 h-16 rounded-full bg-yellow-400 hover:bg-yellow-300 border-4 border-yellow-600 shadow-lg transform active:scale-90 transition-all focus:outline-none ring-4 ring-transparent focus:ring-yellow-200" title="Precaución"></button>
+                            <button onclick="playTraffic('green')" class="w-16 h-16 rounded-full bg-green-500 hover:bg-green-400 border-4 border-green-700 shadow-lg transform active:scale-90 transition-all focus:outline-none ring-4 ring-transparent focus:ring-green-300" title="Adelante"></button>
+                        </div>
+                        <button onclick="startTrafficGame()" id="startTrafficBtn" class="mt-4 bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2 rounded-full font-bold w-full">Iniciar Ronda</button>
+                        <p id="trafficFeedback" class="text-white text-sm mt-3 font-mono hidden">...</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6 text-left relative z-10 mt-8">
+                        <!-- Card Interactiva: Lo Bueno -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg border-2 border-green-100 hover:border-green-400 transition-all cursor-help group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="bg-green-100 p-3 rounded-full text-2xl group-hover:scale-110 transition-transform">🚀</div>
+                                <h3 class="text-xl font-bold text-green-800">Superpoderes (Lo Bueno)</h3>
+                            </div>
+                            <ul class="space-y-2 text-slate-600">
+                                <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Aprenderlo todo al instante.</li>
+                                <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Jugar con amigos en Japón.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Card Interactiva: Lo Malo -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg border-2 border-red-100 hover:border-red-400 transition-all cursor-help group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="bg-red-100 p-3 rounded-full text-2xl group-hover:scale-110 transition-transform">🛑</div>
+                                <h3 class="text-xl font-bold text-red-800">Peligros (Lo Malo)</h3>
+                            </div>
+                            <ul class="space-y-2 text-slate-600">
+                                <li class="flex items-center gap-2"><span class="text-red-500">⚠</span> Mentiras y estafas.</li>
+                                <li class="flex items-center gap-2"><span class="text-red-500">⚠</span> Extraños disfrazados.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button onclick="switchTab('seguridad')" class="mt-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 px-10 rounded-full shadow-lg hover:shadow-2xl hover:scale-105 transition-all text-lg animate-pulse">
+                        Comenzar Entrenamiento 👉
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SEGURIDAD: EL CASTILLO -->
+        <section id="seguridad" data-content>
+            <div class="grid gap-6">
+                <!-- Cabecera -->
+                <div class="text-center">
+                    <span class="inline-block p-3 rounded-full bg-white shadow-md text-4xl mb-2 float-anim">🛡️</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Seguridad y Privacidad: Protegiendo tu Identidad</h2>
+                </div>
+
+                <!-- BLOQUE TEORÍA SEGURIDAD -->
+                <div class="theory-card bg-indigo-50 border-indigo-500">
+                    <h4 class="theory-title text-indigo-700">📂 Archivo de Misión: Conceptos Clave</h4>
+                    <p class="text-slate-700 mb-4">
+                        La <strong>seguridad</strong> consiste en proteger la información (contraseñas). La <strong>privacidad</strong> es decidir qué compartir.
+                        <br><strong>Regla de Oro:</strong> No dar nombres, direcciones o contraseñas a desconocidos.
+                    </p>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                        <div class="bg-white p-3 rounded border border-indigo-100">
+                            <h5 class="font-bold text-indigo-800">🔑 Contraseñas</h5>
+                            <p class="text-xs text-slate-600 mt-1">La llave de tu castillo. Usa frases locas + números. <br><em>Ej: "Egavca8!"</em></p>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-indigo-100">
+                            <h5 class="font-bold text-indigo-800">🚪 Cerrar Sesión</h5>
+                            <p class="text-xs text-slate-600 mt-1">Si usas una compu ajena, cierra la puerta con llave (Log out).</p>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-indigo-100">
+                            <h5 class="font-bold text-indigo-800">🔒 Candado (HTTPS)</h5>
+                            <p class="text-xs text-slate-600 mt-1">Si no ves el candado en la barra de dirección, no pongas datos secretos.</p>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-indigo-100">
+                            <h5 class="font-bold text-indigo-800">👣 Huella Digital</h5>
+                            <p class="text-xs text-slate-600 mt-1">Lo que publicas NO se borra. ¿Te gustaría que tu abuela lo viera en 10 años?</p>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-indigo-100">
+                            <h5 class="font-bold text-indigo-800">🛑 Protocolo ¡ALTO!</h5>
+                            <p class="text-xs text-slate-600 mt-1">Si alguien te asusta: Detente, Sal y CUENTA a un adulto.</p>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-indigo-100">
+                            <h5 class="font-bold text-indigo-800">🤝 Netiqueta</h5>
+                            <p class="text-xs text-slate-600 mt-1">Sé amable. Escribir en mayúsculas es GRITAR. No seas un Troll.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JUEGO 1: PASSWORD CRACKER -->
+                <div class="bg-white p-6 rounded-3xl shadow-xl border-l-8 border-indigo-500 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 opacity-10 text-9xl transform translate-x-10 -translate-y-10">🔐</div>
+                    <h3 class="text-2xl font-bold text-indigo-900 mb-2">Simulador: Laboratorio de Contraseñas</h3>
+                    <p class="mb-4 text-sm text-slate-600">Regla: Larga (10+ caracteres) con Mayúsculas, minúsculas, números y símbolos.</p>
+
+                    <div class="bg-slate-100 p-4 rounded-xl border-2 border-slate-200">
+                        <input type="text" id="passInput" placeholder="Escribe aquí..." class="w-full text-2xl font-mono p-3 rounded-lg border-2 border-slate-300 focus:outline-none focus:border-indigo-500 transition-colors">
+                        
+                        <div class="flex gap-2 mt-3 text-xs font-bold uppercase tracking-wider">
+                            <span id="chk-len" class="bg-gray-200 text-gray-400 px-2 py-1 rounded transition-colors">8+ Letras</span>
+                            <span id="chk-num" class="bg-gray-200 text-gray-400 px-2 py-1 rounded transition-colors">Números</span>
+                            <span id="chk-sym" class="bg-gray-200 text-gray-400 px-2 py-1 rounded transition-colors">Símbolos</span>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-slate-800 rounded-lg text-green-400 font-mono text-sm shadow-inner">
+                            <p>> ANALIZANDO FORTALEZA...</p>
+                            <p id="hackTimeText">> TIEMPO ESTIMADO PARA HACKEAR: <span class="text-white font-bold">0 SEGUNDOS</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NUEVA ACTIVIDAD: CLASIFICADOR PRIVACIDAD -->
+                <div class="bg-indigo-600 p-6 rounded-3xl shadow-xl text-white my-4 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-white opacity-5 rounded-full -mr-10 -mt-10"></div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">👀 Desafío: ¿Público o Privado?</h3>
+                    <p class="text-sm text-indigo-200 mb-4">¿Qué información es seguro compartir en un perfil público?</p>
+                    
+                    <div class="bg-white/10 p-6 rounded-xl text-center mb-4 transition-all duration-300" id="privacyItemContainer">
+                        <div id="privacyItem" class="text-2xl font-bold mb-2">Mi dirección de casa 🏠</div>
+                        <div class="flex justify-center gap-4 mt-4">
+                            <button onclick="checkPrivacy('public')" class="bg-green-500 hover:bg-green-400 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-transform active:scale-95">📢 Público</button>
+                            <button onclick="checkPrivacy('private')" class="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-transform active:scale-95">🔒 Privado</button>
+                        </div>
+                        <p id="privacyFeedback" class="text-sm mt-3 font-bold opacity-0 transition-opacity">...</p>
+                    </div>
+                </div>
+
+                <!-- TEORÍA PERMISOS -->
+                <div class="theory-card bg-orange-50 border-orange-500 mt-4 mb-0">
+                    <h4 class="theory-title text-orange-700">📂 Archivo Nuevo: Instalación y Permisos</h4>
+                    <p class="text-slate-700 text-sm">
+                        <strong>Regla de la Necesidad:</strong> Si un juego de pintar te pide acceso a tus contactos y ubicación, te quiere espiar. Si la app no lo necesita para funcionar, ¡no se lo des!
+                    </p>
+                </div>
+
+                <!-- JUEGO 2: DECISIONES DE PERMISOS -->
+                <div class="bg-white p-6 rounded-3xl shadow-xl border-l-8 border-orange-500">
+                    <h3 class="text-2xl font-bold text-orange-900 mb-4">Simulador: Inspector de Apps</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- App Sospechosa -->
+                        <div class="bg-slate-50 p-4 rounded-xl shadow-md border hover:shadow-lg transition-shadow relative" id="app1">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-lg">🔦 Linterna Gratis</h4>
+                                    <p class="text-xs text-slate-400">Pide acceso a:</p>
+                                </div>
+                                <span class="text-2xl">🔦</span>
+                            </div>
+                            <div class="flex gap-1 mt-2 mb-4 flex-wrap">
+                                <span class="px-2 py-1 bg-red-100 text-red-600 rounded text-xs font-bold border border-red-200">📸 Cámara</span>
+                                <span class="px-2 py-1 bg-red-100 text-red-600 rounded text-xs font-bold border border-red-200">📍 Ubicación</span>
+                                <span class="px-2 py-1 bg-red-100 text-red-600 rounded text-xs font-bold border border-red-200">📞 Contactos</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="judgeApp('app1', false)" class="bg-green-100 text-green-700 font-bold py-2 rounded hover:bg-green-200">Instalar</button>
+                                <button onclick="judgeApp('app1', true)" class="bg-red-500 text-white font-bold py-2 rounded shadow hover:bg-red-600 hover:scale-105 transition-transform">Bloquear 🛡️</button>
+                            </div>
+                            <div class="feedback absolute inset-0 bg-white/95 hidden flex-col items-center justify-center text-center rounded-xl p-2 z-10"></div>
+                        </div>
+
+                        <!-- App Correcta -->
+                        <div class="bg-slate-50 p-4 rounded-xl shadow-md border hover:shadow-lg transition-shadow relative" id="app2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-lg">🗺️ Mapas del Mundo</h4>
+                                    <p class="text-xs text-slate-400">Pide acceso a:</p>
+                                </div>
+                                <span class="text-2xl">🌍</span>
+                            </div>
+                            <div class="flex gap-1 mt-2 mb-4 flex-wrap">
+                                <span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs font-bold border border-green-200">📍 Ubicación</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="judgeApp('app2', true)" class="bg-green-500 text-white font-bold py-2 rounded shadow hover:bg-green-600 hover:scale-105 transition-transform">Instalar ✅</button>
+                                <button onclick="judgeApp('app2', false)" class="bg-red-100 text-red-700 font-bold py-2 rounded hover:bg-red-200">Bloquear</button>
+                            </div>
+                            <div class="feedback absolute inset-0 bg-white/95 hidden flex-col items-center justify-center text-center rounded-xl p-2 z-10"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ALERTAS: EL DETECTOR -->
+        <section id="alertas" data-content>
+            <div class="glass-panel p-6 rounded-3xl shadow-xl border-b-8 border-red-400">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-red-800">Anuncios Engañosos y Ventanas Emergentes</h2>
+                </div>
+
+                <!-- BLOQUE TEORÍA ALERTAS -->
+                <div class="theory-card bg-red-50 border-red-500 text-left">
+                    <h4 class="theory-title text-red-700">📂 Archivo de Misión: Tipos de Trampas</h4>
+                    <p class="text-slate-700 mb-4 text-sm">
+                        En Internet hay <strong>fraudes (scams)</strong> y <strong>ventanas emergentes (pop-ups)</strong> que buscan que hagas clic rápido por miedo o emoción.
+                    </p>
+                    <div class="overflow-x-auto bg-white rounded-lg border border-red-200">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-red-100 text-red-900">
+                                <tr>
+                                    <th class="p-2">Situación</th>
+                                    <th class="p-2">Engaño</th>
+                                    <th class="p-2">Respuesta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="p-2 font-bold">🎁 Premios</td>
+                                    <td class="p-2 text-xs">Prometen iPads o dinero gratis.</td>
+                                    <td class="p-2 text-xs"><strong>¡Piensa Lento!</strong> Nadie regala nada.</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-2 font-bold">😱 Pánico</td>
+                                    <td class="p-2 text-xs">"¡Tienes 5 virus!" (Mentira).</td>
+                                    <td class="p-2 text-xs"><strong>¡No te asustes!</strong> Cierra la ventana.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 font-bold">👻 Pop-ups</td>
+                                    <td class="p-2 text-xs">Botones de "Cerrar" falsos.</td>
+                                    <td class="p-2 text-xs">Busca la pequeña 'X' real.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SIMULADOR DE POP-UP -->
+                <div class="bg-slate-900 p-8 rounded-2xl relative overflow-hidden shadow-inner flex items-center justify-center" style="min-height: 450px;">
+                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] pointer-events-none"></div>
+
+                    <!-- El Pop-up -->
+                    <div id="trapWindow" class="bg-gray-100 w-full max-w-sm rounded-lg shadow-2xl border-4 border-red-600 transform transition-all duration-300 hover:scale-105">
+                        <div class="bg-red-600 text-white px-2 py-1 flex justify-between items-center text-xs font-bold uppercase">
+                            <span>⚠️ Advertencia de Sistema</span>
+                            <div class="flex gap-1">
+                                <div class="w-3 h-3 bg-white rounded-full opacity-50"></div>
+                                <!-- Botón Real Escondido -->
+                                <button onclick="resolveTrap(true)" class="w-4 h-4 bg-gray-300 hover:bg-red-500 text-black hover:text-white flex items-center justify-center rounded text-[10px] cursor-pointer" title="Cerrar (Real)">✕</button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 text-center">
+                            <div class="text-6xl mb-4 animate-bounce">🦠</div>
+                            <h3 class="text-2xl font-black text-red-600 mb-2 leading-none uppercase">¡Virus Detectado!</h3>
+                            <p class="text-sm text-gray-600 mb-4 font-bold">Tu teléfono explotará en <span id="trapTimer">10</span> segundos.</p>
+                            
+                            <button onclick="resolveTrap(false)" class="w-full bg-green-500 hover:bg-green-400 text-white font-black py-4 rounded shadow-[0_6px_0_rgb(21,128,61)] active:shadow-none active:translate-y-1 transition-all uppercase text-lg mb-2 animate-pulse">
+                                ARREGLAR AHORA GRATIS
+                            </button>
+                            <p class="text-[10px] text-gray-400">Haz clic para salvar tu vida digital</p>
+                        </div>
+                    </div>
+
+                    <!-- Pantalla de Resultado -->
+                    <div id="trapResult" class="absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center text-center p-6 hidden z-20">
+                        <div id="trapIcon" class="text-8xl mb-4"></div>
+                        <h3 id="trapTitle" class="text-3xl font-bold text-white mb-2 font-mono"></h3>
+                        <p id="trapMsg" class="text-gray-300 mb-6 max-w-xs"></p>
+                        <div class="bg-white/10 p-4 rounded-lg border border-white/20 text-left w-full max-w-md">
+                            <h4 class="text-yellow-400 font-bold text-sm uppercase mb-1">💡 ¿Por qué?</h4>
+                            <p class="text-sm text-white" id="trapExplanation">...</p>
+                        </div>
+                        <button onclick="resetTrap()" class="mt-6 bg-white text-slate-900 px-6 py-2 rounded-full font-bold hover:scale-105 transition">Reintentar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. BALANCE: ENERGÍA (DÍA/NOCHE) -->
+        <section id="balance" data-content>
+            <div class="p-6 rounded-3xl shadow-xl border-4 border-white/50 transition-colors duration-1000 bg-day" id="balanceCard">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-slate-800 drop-shadow-sm">Tiempo de Uso y Pausas</h2>
+                </div>
+
+                <!-- BLOQUE TEORÍA BALANCE -->
+                <div class="theory-card bg-white/80 border-blue-500 backdrop-blur-md">
+                    <h4 class="theory-title text-blue-900">📂 Archivo de Misión: Salud Digital</h4>
+                    <p class="text-slate-800 text-sm mb-4">
+                        Tu cerebro es una batería. Si la usas sin parar, se agota. Es vital alternar pantallas con juegos al aire libre y sueño.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/90 p-3 rounded-lg border border-blue-200 shadow-sm">
+                            <h5 class="font-bold text-blue-800">👀 Cuerpo y Ojos</h5>
+                            <p class="text-xs text-slate-700 mt-1">Si tienes ojos secos o nuca tensa, haz <strong>Pausas 5/25</strong>.</p>
+                        </div>
+                        <div class="bg-white/90 p-3 rounded-lg border border-blue-200 shadow-sm">
+                            <h5 class="font-bold text-blue-800">😡 Mal Humor y Sueño</h5>
+                            <p class="text-xs text-slate-700 mt-1">La luz azul quita el sueño. <strong>Zona Azul:</strong> 0 pantallas 1h antes de dormir.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-8 items-center justify-center mt-8">
+                    <!-- Slider Control -->
+                    <div class="w-full md:w-1/2 bg-white/60 p-6 rounded-2xl backdrop-blur-sm">
+                        <label class="block text-slate-800 font-bold mb-4 text-lg">Horas de juego hoy:</label>
+                        <input type="range" id="hoursInput" min="0" max="12" value="2" class="w-full h-6 bg-slate-300 rounded-full appearance-none cursor-pointer accent-indigo-600 hover:accent-indigo-500 transition-all">
+                        <div class="flex justify-between text-sm font-bold mt-2 text-slate-600">
+                            <span>0h (Sano)</span>
+                            <span>6h (Mucho)</span>
+                            <span>12h (Zombie)</span>
+                        </div>
+                        <div class="text-center mt-6">
+                            <span id="hoursDisplay" class="text-6xl font-black text-slate-800">2</span>
+                            <span class="text-xl font-bold text-slate-600">Horas</span>
+                        </div>
+                    </div>
+
+                    <!-- Visual Feedback (Avatar) -->
+                    <div class="w-full md:w-1/2 flex flex-col items-center text-center">
+                        <div class="relative w-48 h-48 flex items-center justify-center bg-white rounded-full shadow-2xl mb-4 border-4 border-white/50 transition-transform duration-300" id="avatarContainer">
+                            <div id="balanceEmoji" class="text-9xl transition-all duration-300 filter drop-shadow-md">😊</div>
+                        </div>
+                        <h3 id="balanceStatus" class="text-2xl font-black text-slate-800 mb-2 bg-white/80 px-4 py-1 rounded-lg">Zona Segura</h3>
+                        <p id="balanceDesc" class="text-sm text-slate-900 font-bold bg-white/40 p-2 rounded-lg">Tienes tiempo para fútbol, leer y dormir.</p>
+                    </div>
+                </div>
+
+                <!-- NUEVA ACTIVIDAD: RESPIRACIÓN -->
+                <div class="mt-8 bg-white/40 p-6 rounded-3xl border border-white/60 text-center">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">🌬️ Herramienta: Respiración Guiada</h3>
+                    <p class="text-sm text-slate-700 mb-4">Usa esto para descansar la vista cada 20 minutos.</p>
+                    
+                    <div class="relative h-40 flex items-center justify-center overflow-hidden mb-4">
+                        <div id="breathCircle" class="w-20 h-20 bg-blue-400/50 rounded-full border-4 border-blue-500 transition-all"></div>
+                        <div class="absolute text-slate-800 font-bold" id="breathText">Inhala...</div>
+                    </div>
+                    <button onclick="toggleBreathing()" id="breathBtn" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow hover:bg-blue-500">Activar Modo Zen</button>
+                </div>
+
+                <!-- Info Cards Extras -->
+                <div class="grid md:grid-cols-2 gap-4 mt-8">
+                    <div class="bg-white/80 p-4 rounded-xl flex items-center gap-4 shadow-sm">
+                        <div class="text-3xl">🧘‍♂️</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Regla 20-20-20</h4>
+                            <p class="text-xs text-slate-600">Cada 20 mins, mira lejos (20 pies) por 20 segs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. BÚSQUEDA: SIMULADOR REALISTA -->
+        <section id="busqueda" data-content>
+            <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-purple-300">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-purple-900">Inteligencia de Búsqueda: Investigador Pro</h2>
+                </div>
+
+                <!-- BLOQUE TEORÍA BÚSQUEDA -->
+                <div class="theory-card bg-purple-50 border-purple-500 text-left">
+                    <h4 class="theory-title text-purple-700">📂 Archivo de Misión: Estrategias de Búsqueda</h4>
+                    <p class="text-slate-700 mb-4 text-sm">
+                        Saber buscar es un superpoder. La clave es el <strong>Pensamiento Crítico</strong>.
+                        <br><span class="text-xs bg-yellow-200 px-2 py-1 rounded mt-1 inline-block font-bold">💡 ¿Sabías que Google procesa 99,000 búsquedas por segundo?</span>
+                    </p>
+                    
+                    <div class="grid md:grid-cols-2 gap-4 text-sm mb-4">
+                        <div class="bg-white p-3 rounded border border-purple-100">
+                            <h5 class="font-bold text-purple-800">🛒 Google / Bing</h5>
+                            <p class="text-xs text-slate-600">Es como un <strong>Centro Comercial</strong>. Hay de todo: chismes y ruido. Úsalo para clima y entretenimiento.</p>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-purple-100">
+                            <h5 class="font-bold text-purple-800">📚 Google Académico</h5>
+                            <p class="text-xs text-slate-600">Es como una <strong>Biblioteca</strong>. Solo expertos y ciencia. Úsalo para tareas.</p>
+                        </div>
+                    </div>
+
+                    <h5 class="font-bold text-purple-800 mt-4 text-sm">🔑 Palabras Clave (Keywords)</h5>
+                    <p class="text-xs text-slate-600 mb-2">Elimina basura ("el", "la", "hola"). Usa comillas <code>" "</code> para búsqueda exacta.</p>
+                    <div class="bg-purple-100 p-2 rounded text-xs">
+                        <strong>Novato:</strong> "¿Me puedes decir qué comen los osos en invierno?"<br>
+                        <strong>Experto:</strong> "alimentación osos polares invierno"
+                    </div>
+                </div>
+
+                <!-- SIMULADOR DE BUSCADOR -->
+                <div class="bg-slate-100 p-6 rounded-2xl border-2 border-slate-200 mb-8">
+                    <h3 class="font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                        <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
+                        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                        <span class="ml-2 text-sm text-slate-400">Guguel Search Simulator</span>
+                    </h3>
+                    
+                    <div class="flex gap-2 mb-6">
+                        <div class="relative flex-grow">
+                            <input type="text" id="searchInput" placeholder="Ej: fotos dinosaurios..." class="w-full p-4 pl-12 rounded-full border-2 border-purple-200 focus:outline-none focus:border-purple-500 shadow-sm transition-all text-lg">
+                            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                        </div>
+                    </div>
+
+                    <!-- Área de Resultados Dinámicos -->
+                    <div id="searchResults" class="space-y-3 opacity-50 transition-opacity duration-500">
+                        <div class="h-20 bg-slate-200 rounded animate-pulse w-full"></div>
+                        <div class="h-20 bg-slate-200 rounded animate-pulse w-3/4"></div>
+                    </div>
+
+                    <!-- Mensaje de Feedback -->
+                    <div id="searchFeedbackBox" class="mt-4 p-4 bg-purple-50 rounded-xl border border-purple-100 hidden">
+                        <div class="flex items-start gap-3">
+                            <div class="text-3xl" id="botFace">🤖</div>
+                            <div>
+                                <h4 class="font-bold text-purple-900" id="botTitle">Análisis del Robot</h4>
+                                <p class="text-sm text-purple-800" id="botMsg">...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 flex items-center gap-3">
+                    <div class="text-2xl">⚖️</div>
+                    <div class="text-left">
+                        <h5 class="font-bold text-yellow-800">Verificación: La Regla de 3</h5>
+                        <p class="text-xs text-slate-700">Si ves una noticia increíble ("Lluvia de ranas"), búscala en 3 sitios distintos antes de creerla.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. EXAMEN FINAL: LA GRADUACIÓN -->
+        <section id="quiz" data-content>
+            <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-yellow-400 max-w-2xl mx-auto">
+                <div class="text-center mb-8">
+                    <span class="inline-block p-4 bg-yellow-100 rounded-full text-5xl mb-2 animate-bounce">🎓</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Examen Final: La Prueba del Guardián</h2>
+                    <p class="text-slate-500">Responde correctamente para recibir tu diploma.</p>
+                </div>
+
+                <!-- Quiz Container -->
+                <div id="quizBox" class="space-y-6">
+                    <div class="flex justify-between items-center text-sm font-bold text-slate-400 uppercase tracking-widest">
+                        <span id="qCount">Pregunta 1/5</span>
+                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full" id="qScore">Puntos: 0</span>
+                    </div>
+
+                    <!-- Pregunta -->
+                    <h3 id="qText" class="text-2xl font-bold text-slate-800 leading-tight min-h-[4rem]">...</h3>
+
+                    <!-- Opciones -->
+                    <div id="qOptions" class="grid gap-3">
+                        <!-- Buttons injected via JS -->
+                    </div>
+
+                    <!-- Feedback -->
+                    <div id="qFeedback" class="hidden p-4 rounded-xl bg-slate-100 text-center font-bold border-2 border-slate-200"></div>
+
+                    <button id="qNext" class="hidden w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-indigo-500 transition-all text-lg">
+                        Siguiente ➡️
+                    </button>
+                </div>
+
+                <!-- DIPLOMA OCULTO -->
+                <div id="diploma" class="hidden text-center animate-slideUp">
+                    <div class="bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] bg-yellow-50 p-8 rounded-xl border-8 border-double border-yellow-500 shadow-2xl relative">
+                        <!-- Stamps -->
+                        <div class="absolute top-4 right-4 w-20 h-20 border-4 border-red-800 rounded-full flex items-center justify-center text-red-800 font-black opacity-30 rotate-12 text-xs uppercase text-center p-1">Certificado Oficial</div>
+
+                        <h2 class="text-4xl font-black text-yellow-800 mb-2 uppercase tracking-widest font-serif">Diploma de Honor</h2>
+                        <p class="text-slate-600 italic font-serif mb-6">Se otorga el presente título de</p>
+                        
+                        <h1 class="text-5xl md:text-6xl font-black text-indigo-700 mb-6 uppercase tracking-wider drop-shadow-sm leading-none bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 pb-2">Guardián Digital</h1>
+                        
+                        <div class="bg-white/60 p-4 rounded-lg border border-yellow-200 mb-6">
+                            <h4 class="font-bold text-indigo-900 mb-2">📜 Juramento del Guardián del Ciberespacio</h4>
+                            <p class="text-slate-700 italic font-serif leading-relaxed">
+                                "Prometo usar mi poder para aprender y conectar.<br>
+                                Prometo proteger mi llave y mi identidad.<br>
+                                Prometo ser amable y a los trolls bloquear.<br>
+                                ¡Soy un Guardián Digital y me sé cuidar!"
+                            </p>
+                        </div>
+
+                        <button onclick="location.reload()" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:bg-indigo-500 shadow-xl hover:scale-105 transition transform">Volver a Entrenar 🔄</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- ESTADO GLOBAL ---
+        let currentXP = 0;
+        const totalXP = 500;
+        
+        // --- NAVEGACIÓN ---
+        function switchTab(id) {
+            // Actualizar botones
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.onclick.toString().includes(id));
+            if(activeBtn) activeBtn.classList.add('active');
+
+            // Actualizar contenido
+            document.querySelectorAll('[data-content]').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            // Actualizar Barra de Progreso (Simulada por navegación)
+            const steps = ['intro', 'seguridad', 'alertas', 'balance', 'busqueda', 'quiz'];
+            const idx = steps.indexOf(id);
+            const progress = ((idx + 1) / steps.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        function addXP(amount, medalId) {
+            currentXP += amount;
+            document.getElementById('xpPoints').innerText = `${currentXP} XP`;
+            
+            // Animación de XP
+            const xpEl = document.getElementById('xpPoints');
+            xpEl.classList.add('scale-125', 'text-white');
+            setTimeout(() => xpEl.classList.remove('scale-125', 'text-white'), 300);
+
+            // Desbloquear Medalla
+            if(medalId) {
+                const medal = document.getElementById(medalId);
+                if(medal) {
+                    medal.classList.remove('opacity-30', 'grayscale');
+                    medal.classList.add('scale-150', 'rotate-12');
+                    setTimeout(() => medal.classList.remove('scale-150', 'rotate-12'), 500);
+                }
+            }
+        }
+
+        // --- 1.1 NUEVA ACTIVIDAD: SEMÁFORO ---
+        const trafficScenarios = [
+            { t: "Un extraño te pide tu dirección para enviarte un regalo.", c: 'red' },
+            { t: "Tu mejor amigo te invita a jugar online.", c: 'green' },
+            { t: "Una web te pide descargar un archivo para ver un video.", c: 'yellow' },
+            { t: "Alguien te insulta en un comentario.", c: 'red' }
+        ];
+        let tIdx = 0;
+        
+        function startTrafficGame() {
+            tIdx = 0;
+            loadTrafficScenario();
+            document.getElementById('startTrafficBtn').classList.add('hidden');
+        }
+
+        function loadTrafficScenario() {
+            if(tIdx >= trafficScenarios.length) {
+                document.getElementById('trafficLightCard').innerHTML = "¡Excelente! Has completado el entrenamiento de tráfico.";
+                document.getElementById('trafficButtons').classList.add('hidden');
+                return;
+            }
+            document.getElementById('trafficLightCard').innerHTML = trafficScenarios[tIdx].t;
+            document.getElementById('trafficFeedback').classList.add('hidden');
+        }
+
+        function playTraffic(color) {
+            const correct = trafficScenarios[tIdx].c;
+            const fb = document.getElementById('trafficFeedback');
+            fb.classList.remove('hidden');
+            
+            if(color === correct) {
+                fb.innerText = "¡Correcto! Sabes identificar el peligro.";
+                fb.className = "text-green-400 text-sm mt-3 font-bold";
+                confetti({ particleCount: 15, spread: 40, origin: { y: 0.5 } });
+                tIdx++;
+                setTimeout(loadTrafficScenario, 1500);
+            } else {
+                fb.innerText = "Intenta de nuevo. Piénsalo bien.";
+                fb.className = "text-red-400 text-sm mt-3 font-bold";
+            }
+        }
+
+        // --- 2. SEGURIDAD: PASSWORD CHECKER ---
+        const pInput = document.getElementById('passInput');
+        pInput.addEventListener('input', (e) => {
+            const v = e.target.value;
+            // Checks
+            const hasLen = v.length >= 8;
+            const hasNum = /[0-9]/.test(v);
+            const hasSym = /[!@#$%^&*]/.test(v);
+
+            // UI Feedback
+            const toggleClass = (id, condition) => {
+                const el = document.getElementById(id);
+                if(condition) {
+                    el.classList.remove('bg-gray-200', 'text-gray-400');
+                    el.classList.add('bg-green-500', 'text-white');
+                } else {
+                    el.classList.add('bg-gray-200', 'text-gray-400');
+                    el.classList.remove('bg-green-500', 'text-white');
+                }
+            };
+            toggleClass('chk-len', hasLen);
+            toggleClass('chk-num', hasNum);
+            toggleClass('chk-sym', hasSym);
+
+            // Time Calculation Simulation
+            let timeText = "0 SEGUNDOS";
+            if(v.length === 0) timeText = "0 SEGUNDOS";
+            else if(v.length < 5) timeText = "0.002 SEGUNDOS (INSTANTÁNEO)";
+            else if(!hasNum && !hasSym) timeText = "2 MINUTOS";
+            else if(hasLen && hasNum && !hasSym) timeText = "3 DÍAS";
+            else if(hasLen && hasNum && hasSym) {
+                timeText = "400 AÑOS 🛡️";
+                if(!pInput.dataset.rewarded) {
+                    addXP(50, 'medal-seguridad');
+                    pInput.dataset.rewarded = true;
+                    confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } });
+                }
+            }
+            
+            document.querySelector('#hackTimeText span').innerText = timeText;
+        });
+
+        // --- 2.1 NUEVA ACTIVIDAD: PRIVACIDAD ---
+        const privacyItems = [
+            { t: "Mi dirección de casa 🏠", type: "private" },
+            { t: "Mi videojuego favorito 🎮", type: "public" },
+            { t: "El nombre de mi escuela 🏫", type: "private" },
+            { t: "Una foto de mi gato 🐱", type: "public" },
+            { t: "Mi contraseña secreta 🔑", type: "private" }
+        ];
+        let pIdx = 0;
+
+        function checkPrivacy(choice) {
+            const current = privacyItems[pIdx];
+            const fb = document.getElementById('privacyFeedback');
+            fb.classList.remove('opacity-0');
+            
+            if (choice === current.type) {
+                fb.innerText = "¡Correcto! ✅";
+                fb.classList.add('text-green-200');
+                fb.classList.remove('text-red-200');
+                pIdx = (pIdx + 1) % privacyItems.length; // Loop infinito
+                setTimeout(() => {
+                    document.getElementById('privacyItem').innerText = privacyItems[pIdx].t;
+                    fb.classList.add('opacity-0');
+                }, 1000);
+            } else {
+                fb.innerText = "¡Peligro! Piénsalo mejor. 🛑";
+                fb.classList.add('text-red-200');
+                fb.classList.remove('text-green-200');
+            }
+        }
+
+        // --- 2. SEGURIDAD: APP JUDGE ---
+        function judgeApp(appId, isCorrect) {
+            const container = document.getElementById(appId);
+            const feedback = container.querySelector('.feedback');
+            
+            feedback.classList.remove('hidden', 'flex');
+            feedback.classList.add('flex');
+            
+            if(isCorrect) {
+                feedback.innerHTML = `
+                    <div class="text-4xl mb-2">🎉</div>
+                    <h4 class="font-bold text-green-600">¡Excelente Decisión!</h4>
+                    <p class="text-xs text-slate-500 mt-1">Has aplicado la Regla de Necesidad correctamente.</p>
+                `;
+                feedback.classList.add('bg-green-50');
+            } else {
+                feedback.innerHTML = `
+                    <div class="text-4xl mb-2">⚠️</div>
+                    <h4 class="font-bold text-red-600">¡Cuidado!</h4>
+                    <p class="text-xs text-slate-500 mt-1">Esa app pedía permisos sospechosos que no necesita.</p>
+                    <button onclick="this.parentElement.classList.add('hidden')" class="mt-2 text-xs underline text-slate-400">Intentar de nuevo</button>
+                `;
+                container.classList.add('shake-anim');
+                setTimeout(() => container.classList.remove('shake-anim'), 500);
+            }
+        }
+
+        // --- 3. ALERTAS: TRAP GAME ---
+        function resolveTrap(isSafe) {
+            document.getElementById('trapWindow').classList.add('hidden');
+            const res = document.getElementById('trapResult');
+            res.classList.remove('hidden');
+            
+            const icon = document.getElementById('trapIcon');
+            const title = document.getElementById('trapTitle');
+            const msg = document.getElementById('trapMsg');
+            const exp = document.getElementById('trapExplanation');
+
+            if(isSafe) {
+                icon.innerText = "😎";
+                title.innerText = "¡ESQUIVADO!";
+                title.className = "text-3xl font-bold text-green-400 mb-2 font-mono";
+                msg.innerText = "Encontraste el botón real y evitaste el virus.";
+                exp.innerText = "Los virus suelen usar botones GIGANTES para asustarte y que hagas clic rápido. El botón de cerrar real suele ser pequeño, gris y estar escondido.";
+                addXP(50, 'medal-alertas');
+                confetti({ particleCount: 50, origin: { x: 0.5, y: 0.7 } });
+            } else {
+                icon.innerText = "💀";
+                title.innerText = "INFECTADO";
+                title.className = "text-3xl font-bold text-red-500 mb-2 font-mono";
+                msg.innerText = "Caíste en la trampa del pánico.";
+                exp.innerText = "Nunca creas mensajes que gritan o tienen cuenta regresiva. Quieren que apagues tu cerebro. Respira y busca la X.";
+            }
+        }
+        function resetTrap() {
+            document.getElementById('trapWindow').classList.remove('hidden');
+            document.getElementById('trapResult').classList.add('hidden');
+        }
+
+        // --- 4. BALANCE: DAY/NIGHT CYCLE ---
+        const hInput = document.getElementById('hoursInput');
+        hInput.addEventListener('input', (e) => {
+            const v = parseInt(e.target.value);
+            document.getElementById('hoursDisplay').innerText = v;
+            
+            const card = document.getElementById('balanceCard');
+            const emoji = document.getElementById('balanceEmoji');
+            const status = document.getElementById('balanceStatus');
+            const body = document.getElementById('mainBody');
+
+            // Estados
+            if(v <= 2) {
+                // Sano
+                card.className = "p-6 rounded-3xl shadow-xl border-4 border-white/50 transition-colors duration-1000 bg-day";
+                body.className = "bg-sky-50 transition-colors duration-1000 min-h-screen flex flex-col";
+                emoji.innerText = "😊";
+                status.innerText = "Zona Segura";
+                status.className = "text-2xl font-black text-green-700 mb-2 bg-white/80 px-4 py-1 rounded-lg";
+                if(v===2) addXP(10, 'medal-balance'); // Micro reward
+            } else if (v <= 6) {
+                // Warning
+                card.className = "p-6 rounded-3xl shadow-xl border-4 border-white/50 transition-colors duration-1000 bg-sunset";
+                body.className = "bg-orange-50 transition-colors duration-1000 min-h-screen flex flex-col";
+                emoji.innerText = "😐";
+                status.innerText = "Zona Cansada";
+                status.className = "text-2xl font-black text-orange-800 mb-2 bg-white/80 px-4 py-1 rounded-lg";
+            } else {
+                // Danger
+                card.className = "p-6 rounded-3xl shadow-xl border-4 border-white/50 transition-colors duration-1000 bg-night";
+                body.className = "bg-slate-900 transition-colors duration-1000 min-h-screen flex flex-col";
+                emoji.innerText = "🧟";
+                status.innerText = "Modo Zombie";
+                status.className = "text-2xl font-black text-red-600 mb-2 bg-white/80 px-4 py-1 rounded-lg";
+            }
+        });
+
+        // --- 4.1 NUEVA ACTIVIDAD: RESPIRACIÓN ---
+        let breathing = false;
+        function toggleBreathing() {
+            const circle = document.getElementById('breathCircle');
+            const txt = document.getElementById('breathText');
+            const btn = document.getElementById('breathBtn');
+            
+            if(!breathing) {
+                circle.classList.add('breathing-circle');
+                txt.innerText = "Inhala... Exhala...";
+                btn.innerText = "Detener";
+                btn.classList.add('bg-red-500');
+                btn.classList.remove('bg-blue-600');
+            } else {
+                circle.classList.remove('breathing-circle');
+                txt.innerText = "Listo";
+                btn.innerText = "Activar Modo Zen";
+                btn.classList.remove('bg-red-500');
+                btn.classList.add('bg-blue-600');
+            }
+            breathing = !breathing;
+        }
+
+        // --- 5. BÚSQUEDA: SIMULADOR ---
+        const sInput = document.getElementById('searchInput');
+        const sResults = document.getElementById('searchResults');
+        const stopWords = ['el', 'la', 'los', 'un', 'una', 'hola', 'por', 'favor', 'fotos'];
+
+        sInput.addEventListener('input', (e) => {
+            const txt = e.target.value.toLowerCase();
+            const box = document.getElementById('searchFeedbackBox');
+            
+            // Si está vacío
+            if(txt.length < 3) {
+                sResults.innerHTML = `<div class="h-20 bg-slate-200 rounded animate-pulse w-full"></div><div class="h-20 bg-slate-200 rounded animate-pulse w-3/4"></div>`;
+                sResults.classList.add('opacity-50');
+                box.classList.add('hidden');
+                return;
+            }
+
+            sResults.classList.remove('opacity-50');
+            box.classList.remove('hidden');
+
+            // Analizar
+            const words = txt.split(' ');
+            let junk = 0;
+            words.forEach(w => { if(stopWords.includes(w)) junk++; });
+            
+            const isExact = txt.includes('"');
+
+            if(junk >= 2) {
+                // Mala búsqueda
+                document.getElementById('botFace').innerText = "🤯";
+                document.getElementById('botTitle').innerText = "Demasiado Ruido";
+                document.getElementById('botTitle').className = "font-bold text-red-600";
+                document.getElementById('botMsg').innerText = "Estás hablando como humano. Elimina 'hola', 'por favor', 'fotos de'. Usa solo palabras clave.";
+                
+                sResults.innerHTML = `
+                    <div class="p-3 bg-red-50 border border-red-200 rounded">
+                        <h4 class="text-blue-600 underline">Hola, aquí hay fotos de gatos...</h4>
+                        <p class="text-xs text-slate-500">Resultados irrelevantes y anuncios...</p>
+                    </div>
+                `;
+            } else if (isExact) {
+                // Búsqueda Exacta
+                document.getElementById('botFace').innerText = "🎯";
+                document.getElementById('botTitle').innerText = "Francotirador";
+                document.getElementById('botTitle').className = "font-bold text-purple-600";
+                document.getElementById('botMsg').innerText = "¡Excelente uso de comillas! Buscando la frase exacta.";
+                addXP(50, 'medal-busqueda');
+                
+                sResults.innerHTML = `
+                    <div class="p-3 bg-green-50 border border-green-200 rounded">
+                        <h4 class="text-blue-600 underline">Resultado Exacto: ${e.target.value.replace(/"/g, '')}</h4>
+                        <p class="text-xs text-slate-500">Información verificada y directa.</p>
+                    </div>
+                `;
+            } else {
+                // Búsqueda Normal
+                document.getElementById('botFace').innerText = "🤖";
+                document.getElementById('botTitle').innerText = "Búsqueda Estándar";
+                document.getElementById('botTitle').className = "font-bold text-slate-600";
+                document.getElementById('botMsg').innerText = "Entendido. Para mejorar, intenta ser más específico.";
+                
+                sResults.innerHTML = `
+                    <div class="p-3 bg-white border border-slate-200 rounded">
+                        <h4 class="text-blue-600 underline">Resultados para: ${e.target.value}</h4>
+                        <p class="text-xs text-slate-500">Wikipedia, Noticias, Imágenes...</p>
+                    </div>
+                `;
+            }
+        });
+
+        // --- 6. QUIZ ---
+        const questions = [
+            { t: "Un juego pide tu dirección real...", o: ["La doy", "Cierro y aviso", "Miento"], a: 1 },
+            { t: "¿La mejor contraseña?", o: ["1234", "Goku123", "Pizz@_Roj4!"], a: 2 },
+            { t: "¿Regla para los ojos?", o: ["20-20-20", "50-50", "Dormir"], a: 0 },
+            { t: "¿Qué hace el candado HTTPS?", o: ["Nada", "Cifra mis datos", "Cierra la web"], a: 1 },
+            { t: "¿Todo en internet es verdad?", o: ["Sí", "No, verifico", "Si sale en TikTok sí"], a: 1 }
+        ];
+        let qIdx = 0;
+        let score = 0;
+
+        function renderQuiz() {
+            const q = questions[qIdx];
+            document.getElementById('qCount').innerText = `Pregunta ${qIdx + 1}/${questions.length}`;
+            document.getElementById('qText').innerText = q.t;
+            
+            const box = document.getElementById('qOptions');
+            box.innerHTML = '';
+            document.getElementById('qFeedback').classList.add('hidden');
+            document.getElementById('qNext').classList.add('hidden');
+
+            q.o.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 transition font-medium bg-white result-card";
+                btn.innerText = opt;
+                btn.onclick = () => checkAns(idx, btn);
+                box.appendChild(btn);
+            });
+        }
+
+        function checkAns(idx, btn) {
+            // Disable all
+            Array.from(document.getElementById('qOptions').children).forEach(b => b.disabled = true);
+            
+            const isCorrect = idx === questions[qIdx].a;
+            const feed = document.getElementById('qFeedback');
+            
+            feed.classList.remove('hidden');
+            document.getElementById('qNext').classList.remove('hidden');
+
+            if(isCorrect) {
+                score++;
+                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                feed.innerText = "¡Correcto! 🌟";
+                feed.className = "p-4 rounded-xl bg-green-100 text-center font-bold border-2 border-green-200 text-green-800";
+                confetti({ particleCount: 20, spread: 30, origin: { y: 0.8 } });
+            } else {
+                btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                feed.innerText = "Ups, incorrecto. 😅";
+                feed.className = "p-4 rounded-xl bg-red-100 text-center font-bold border-2 border-red-200 text-red-800";
+            }
+            document.getElementById('qScore').innerText = `Puntos: ${score}`;
+        }
+
+        document.getElementById('qNext').onclick = () => {
+            qIdx++;
+            if(qIdx < questions.length) renderQuiz();
+            else showDiploma();
+        };
+
+        function showDiploma() {
+            document.getElementById('quizBox').classList.add('hidden');
+            document.getElementById('diploma').classList.remove('hidden');
+            
+            // Gran Final
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Init
+        renderQuiz();
+
+    </script>
+</body>
+</html>
